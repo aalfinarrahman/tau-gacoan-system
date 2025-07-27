@@ -1,11 +1,327 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-    <title>Test Tau Gacoan</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tau Gacoan - Sistem Manajemen Meja</title>
+    <style>
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0; padding: 20px; 
+            background: linear-gradient(135deg, #fef2f2, #fef7ed);
+            min-height: 100vh;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 { color: #dc2626; font-size: 2.5rem; margin: 0; }
+        .header p { color: #6b7280; margin: 10px 0; }
+        
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 15px; margin-bottom: 30px; }
+        .stat-card { background: white; padding: 20px; border-radius: 10px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .stat-number { font-size: 2rem; font-weight: bold; margin-bottom: 5px; }
+        .stat-label { color: #6b7280; font-size: 0.9rem; }
+        .green { color: #10b981; }
+        .red { color: #ef4444; }
+        .yellow { color: #f59e0b; }
+        .blue { color: #3b82f6; }
+        
+        .zones { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 30px; }
+        .zone-btn { 
+            padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; 
+            color: white; font-weight: bold; transition: all 0.2s;
+        }
+        .zone-btn:hover { transform: translateY(-2px); opacity: 0.9; }
+        .zone-a { background: #3b82f6; }
+        .zone-b { background: #10b981; }
+        .zone-c { background: #8b5cf6; }
+        .zone-d { background: #f59e0b; }
+        .zone-all { background: #6b7280; }
+        
+        .tables-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); 
+            gap: 8px; 
+            margin-bottom: 30px; 
+        }
+        .table { 
+            aspect-ratio: 1; 
+            border-radius: 8px; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            cursor: pointer; 
+            transition: all 0.2s; 
+            color: white; 
+            font-weight: bold;
+        }
+        .table:hover { transform: scale(1.05); }
+        .table.available { background: #10b981; }
+        .table.occupied { background: #ef4444; }
+        .table.cleaning { background: #f59e0b; }
+        
+        .table-num { font-size: 1.1rem; }
+        .table-zone { font-size: 0.7rem; opacity: 0.8; }
+        .table-info { font-size: 0.6rem; }
+        
+        .legend { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; }
+        .legend-item { display: flex; align-items: center; gap: 8px; }
+        .legend-color { width: 16px; height: 16px; border-radius: 4px; }
+        
+        .modal { 
+            display: none; 
+            position: fixed; 
+            top: 0; left: 0; 
+            width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.5); 
+            z-index: 1000;
+        }
+        .modal-content { 
+            background: white; 
+            margin: 50px auto; 
+            padding: 30px; 
+            border-radius: 10px; 
+            max-width: 400px; 
+            position: relative;
+        }
+        .close { 
+            position: absolute; 
+            top: 10px; right: 15px; 
+            font-size: 2rem; 
+            cursor: pointer; 
+            color: #6b7280;
+        }
+        .close:hover { color: #ef4444; }
+        
+        .btn { 
+            padding: 10px 20px; 
+            border: none; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            margin: 5px; 
+            transition: all 0.2s;
+        }
+        .btn:hover { transform: translateY(-1px); }
+        .btn-green { background: #10b981; color: white; }
+        .btn-red { background: #ef4444; color: white; }
+        .btn-yellow { background: #f59e0b; color: white; }
+        .btn-gray { background: #6b7280; color: white; }
+        
+        .input { 
+            width: 100%; 
+            padding: 10px; 
+            border: 2px solid #e5e7eb; 
+            border-radius: 6px; 
+            margin-bottom: 15px; 
+            font-size: 1rem;
+        }
+        .input:focus { border-color: #dc2626; outline: none; }
+        
+        @media (max-width: 768px) {
+            .header h1 { font-size: 2rem; }
+            .tables-grid { grid-template-columns: repeat(auto-fill, minmax(50px, 1fr)); }
+            .modal-content { margin: 20px; padding: 20px; }
+        }
+    </style>
 </head>
 <body>
-    <h1>Hello World!</h1>
-    <p>Tau Gacoan System - Test Page</p>
-    <p>Jika halaman ini muncul, berarti setup sudah benar!</p>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🍜 Tau Gacoan</h1>
+            <p>Sistem Manajemen Meja Multi-Zone</p>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number green" id="availableCount">75</div>
+                <div class="stat-label">Meja Kosong</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number red" id="occupiedCount">20</div>
+                <div class="stat-label">Meja Terisi</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number yellow" id="cleaningCount">5</div>
+                <div class="stat-label">Cleaning</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number blue">100</div>
+                <div class="stat-label">Total Meja</div>
+            </div>
+        </div>
+
+        <!-- Zone Buttons -->
+        <div class="zones">
+            <button class="zone-btn zone-all" onclick="showZone('all')">Semua Area</button>
+            <button class="zone-btn zone-a" onclick="showZone('A')">Area A - Depan (1-25)</button>
+            <button class="zone-btn zone-b" onclick="showZone('B')">Area B - Tengah (26-55)</button>
+            <button class="zone-btn zone-c" onclick="showZone('C')">Area C - Belakang (56-80)</button>
+            <button class="zone-btn zone-d" onclick="showZone('D')">Area D - Outdoor (81-100)</button>
+        </div>
+
+        <!-- Tables Grid -->
+        <div class="tables-grid" id="tablesGrid"></div>
+
+        <!-- Legend -->
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color" style="background: #10b981;"></div>
+                <span>Kosong</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #ef4444;"></div>
+                <span>Terisi</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #f59e0b;"></div>
+                <span>Cleaning</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="tableModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2 id="modalTitle">Meja 1</h2>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <script>
+        // Data meja
+        let tables = [];
+        let currentZone = 'all';
+
+        // Inisialisasi meja
+        function initTables() {
+            const zones = [
+                { id: 'A', start: 1, end: 25 },
+                { id: 'B', start: 26, end: 55 },
+                { id: 'C', start: 56, end: 80 },
+                { id: 'D', start: 81, end: 100 }
+            ];
+
+            zones.forEach(zone => {
+                for (let i = zone.start; i <= zone.end; i++) {
+                    const random = Math.random();
+                    let status = 'available';
+                    if (random > 0.8) status = 'occupied';
+                    else if (random > 0.75) status = 'cleaning';
+
+                    tables.push({
+                        id: i,
+                        number: i,
+                        zone: zone.id,
+                        status: status,
+                        customers: status === 'occupied' ? Math.floor(Math.random() * 4) + 1 : 0,
+                        customerName: '',
+                        startTime: status === 'occupied' ? new Date() : null
+                    });
+                }
+            });
+            renderTables();
+        }
+
+        // Render meja
+        function renderTables() {
+            const grid = document.getElementById('tablesGrid');
+            const filtered = currentZone === 'all' ? tables : tables.filter(t => t.zone === currentZone);
+
+            grid.innerHTML = filtered.map(table => `
+                <div class="table ${table.status}" onclick="openModal(${table.id})">
+                    <div class="table-num">${table.number}</div>
+                    <div class="table-zone">${table.zone}</div>
+                    ${table.status === 'occupied' ? `<div class="table-info">${table.customers}👥</div>` : ''}
+                </div>
+            `).join('');
+
+            updateStats();
+        }
+
+        // Update statistik
+        function updateStats() {
+            document.getElementById('availableCount').textContent = tables.filter(t => t.status === 'available').length;
+            document.getElementById('occupiedCount').textContent = tables.filter(t => t.status === 'occupied').length;
+            document.getElementById('cleaningCount').textContent = tables.filter(t => t.status === 'cleaning').length;
+        }
+
+        // Tampilkan zone
+        function showZone(zone) {
+            currentZone = zone;
+            renderTables();
+        }
+
+        // Buka modal
+        function openModal(tableId) {
+            const table = tables.find(t => t.id === tableId);
+            document.getElementById('modalTitle').textContent = `Meja ${table.number} - Area ${table.zone}`;
+            
+            let body = `<p><strong>Status:</strong> ${table.status}</p>`;
+            
+            if (table.status === 'available') {
+                body += `<button class="btn btn-red" onclick="changeStatus(${tableId}, 'occupied')">Isi Meja</button>`;
+            } else if (table.status === 'occupied') {
+                body += `
+                    <label>Nama Pelanggan:</label>
+                    <input type="text" class="input" id="customerName" value="${table.customerName}" placeholder="Masukkan nama">
+                    <label>Jumlah Orang:</label>
+                    <input type="number" class="input" id="customerCount" value="${table.customers}" min="1" max="20">
+                    <div>
+                        <button class="btn btn-yellow" onclick="changeStatus(${tableId}, 'cleaning')">Perlu Cleaning</button>
+                        <button class="btn btn-green" onclick="changeStatus(${tableId}, 'available')">Kosongkan Meja</button>
+                    </div>
+                `;
+            } else if (table.status === 'cleaning') {
+                body += `<button class="btn btn-green" onclick="changeStatus(${tableId}, 'available')">Selesai Cleaning</button>`;
+            }
+
+            document.getElementById('modalBody').innerHTML = body;
+            document.getElementById('tableModal').style.display = 'block';
+        }
+
+        // Tutup modal
+        function closeModal() {
+            document.getElementById('tableModal').style.display = 'none';
+        }
+
+        // Ubah status meja
+        function changeStatus(tableId, newStatus) {
+            const table = tables.find(t => t.id === tableId);
+            
+            // Update dari input jika ada
+            const nameInput = document.getElementById('customerName');
+            const countInput = document.getElementById('customerCount');
+            if (nameInput) table.customerName = nameInput.value;
+            if (countInput) table.customers = parseInt(countInput.value) || 0;
+            
+            table.status = newStatus;
+            if (newStatus === 'occupied') {
+                table.startTime = new Date();
+                if (!table.customers) table.customers = 2;
+            } else if (newStatus === 'available') {
+                table.customers = 0;
+                table.customerName = '';
+                table.startTime = null;
+            }
+
+            closeModal();
+            renderTables();
+        }
+
+        // Inisialisasi saat halaman dimuat
+        window.onload = initTables;
+
+        // Tutup modal jika klik di luar
+        window.onclick = function(event) {
+            const modal = document.getElementById('tableModal');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+    </script>
 </body>
 </html>
