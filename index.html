@@ -4,324 +4,249 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tau Gacoan - Sistem Manajemen Meja</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            margin: 0; padding: 20px; 
-            background: linear-gradient(135deg, #fef2f2, #fef7ed);
-            min-height: 100vh;
-        }
-        .container { max-width: 1200px; margin: 0 auto; }
-        .header { text-align: center; margin-bottom: 30px; }
-        .header h1 { color: #dc2626; font-size: 2.5rem; margin: 0; }
-        .header p { color: #6b7280; margin: 10px 0; }
-        
-        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 15px; margin-bottom: 30px; }
-        .stat-card { background: white; padding: 20px; border-radius: 10px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .stat-number { font-size: 2rem; font-weight: bold; margin-bottom: 5px; }
-        .stat-label { color: #6b7280; font-size: 0.9rem; }
-        .green { color: #10b981; }
-        .red { color: #ef4444; }
-        .yellow { color: #f59e0b; }
-        .blue { color: #3b82f6; }
-        
-        .zones { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 30px; }
-        .zone-btn { 
-            padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; 
-            color: white; font-weight: bold; transition: all 0.2s;
-        }
-        .zone-btn:hover { transform: translateY(-2px); opacity: 0.9; }
-        .zone-a { background: #3b82f6; }
-        .zone-b { background: #10b981; }
-        .zone-c { background: #8b5cf6; }
-        .zone-d { background: #f59e0b; }
-        .zone-all { background: #6b7280; }
-        
-        .tables-grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); 
-            gap: 8px; 
-            margin-bottom: 30px; 
-        }
-        .table { 
-            aspect-ratio: 1; 
-            border-radius: 8px; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            cursor: pointer; 
-            transition: all 0.2s; 
-            color: white; 
-            font-weight: bold;
-        }
-        .table:hover { transform: scale(1.05); }
-        .table.available { background: #10b981; }
-        .table.occupied { background: #ef4444; }
-        .table.cleaning { background: #f59e0b; }
-        
-        .table-num { font-size: 1.1rem; }
-        .table-zone { font-size: 0.7rem; opacity: 0.8; }
-        .table-info { font-size: 0.6rem; }
-        
-        .legend { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; }
-        .legend-item { display: flex; align-items: center; gap: 8px; }
-        .legend-color { width: 16px; height: 16px; border-radius: 4px; }
-        
-        .modal { 
-            display: none; 
-            position: fixed; 
-            top: 0; left: 0; 
-            width: 100%; height: 100%; 
-            background: rgba(0,0,0,0.5); 
-            z-index: 1000;
-        }
-        .modal-content { 
-            background: white; 
-            margin: 50px auto; 
-            padding: 30px; 
-            border-radius: 10px; 
-            max-width: 400px; 
-            position: relative;
-        }
-        .close { 
-            position: absolute; 
-            top: 10px; right: 15px; 
-            font-size: 2rem; 
-            cursor: pointer; 
-            color: #6b7280;
-        }
-        .close:hover { color: #ef4444; }
-        
-        .btn { 
-            padding: 10px 20px; 
-            border: none; 
-            border-radius: 6px; 
-            cursor: pointer; 
-            font-weight: bold; 
-            margin: 5px; 
-            transition: all 0.2s;
-        }
-        .btn:hover { transform: translateY(-1px); }
-        .btn-green { background: #10b981; color: white; }
-        .btn-red { background: #ef4444; color: white; }
-        .btn-yellow { background: #f59e0b; color: white; }
-        .btn-gray { background: #6b7280; color: white; }
-        
-        .input { 
-            width: 100%; 
-            padding: 10px; 
-            border: 2px solid #e5e7eb; 
-            border-radius: 6px; 
-            margin-bottom: 15px; 
-            font-size: 1rem;
-        }
-        .input:focus { border-color: #dc2626; outline: none; }
-        
-        @media (max-width: 768px) {
-            .header h1 { font-size: 2rem; }
-            .tables-grid { grid-template-columns: repeat(auto-fill, minmax(50px, 1fr)); }
-            .modal-content { margin: 20px; padding: 20px; }
-        }
+        .table-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 8px; }
+        .table-item { aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
+        .table-item:hover { transform: scale(1.05); }
+        .available { background-color: #10b981; color: white; }
+        .occupied { background-color: #ef4444; color: white; }
+        .cleaning { background-color: #f59e0b; color: white; }
     </style>
 </head>
-<body>
-    <div class="container">
+<body class="bg-gradient-to-br from-red-50 to-orange-50 min-h-screen">
+    <div class="container mx-auto p-4">
         <!-- Header -->
-        <div class="header">
-            <h1>🍜 Tau Gacoan</h1>
-            <p>Sistem Manajemen Meja Multi-Zone</p>
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-red-600 mb-2">Tau Gacoan</h1>
+            <p class="text-gray-600">Sistem Manajemen Meja Multi-Zone</p>
+        </div>
+
+        <!-- User Selection -->
+        <div class="mb-6 text-center">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Login sebagai:</label>
+            <select id="userRole" class="px-4 py-2 border border-gray-300 rounded-lg">
+                <option value="admin">Manager/Admin</option>
+                <option value="waiter_a">Waiter Area A</option>
+                <option value="waiter_b">Waiter Area B</option>
+                <option value="waiter_c">Waiter Area C</option>
+                <option value="waiter_d">Waiter Area D</option>
+                <option value="cleaning">Cleaning Staff</option>
+            </select>
+        </div>
+
+        <!-- Zone Selection -->
+        <div class="flex flex-wrap justify-center gap-2 mb-6">
+            <button onclick="showZone('all')" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700">
+                Semua Area
+            </button>
+            <button onclick="showZone('A')" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                Area A - Depan
+            </button>
+            <button onclick="showZone('B')" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                Area B - Tengah  
+            </button>
+            <button onclick="showZone('C')" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
+                Area C - Belakang
+            </button>
+            <button onclick="showZone('D')" class="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700">
+                Area D - Outdoor
+            </button>
         </div>
 
         <!-- Stats -->
-        <div class="stats">
-            <div class="stat-card">
-                <div class="stat-number green" id="availableCount">75</div>
-                <div class="stat-label">Meja Kosong</div>
+        <div class="grid grid-cols-3 md:grid-cols-5 gap-4 mb-6">
+            <div class="bg-white rounded-lg p-4 text-center shadow-md">
+                <div class="text-2xl font-bold text-green-600" id="availableCount">75</div>
+                <div class="text-sm text-gray-500">Kosong</div>
             </div>
-            <div class="stat-card">
-                <div class="stat-number red" id="occupiedCount">20</div>
-                <div class="stat-label">Meja Terisi</div>
+            <div class="bg-white rounded-lg p-4 text-center shadow-md">
+                <div class="text-2xl font-bold text-red-600" id="occupiedCount">20</div>
+                <div class="text-sm text-gray-500">Terisi</div>
             </div>
-            <div class="stat-card">
-                <div class="stat-number yellow" id="cleaningCount">5</div>
-                <div class="stat-label">Cleaning</div>
+            <div class="bg-white rounded-lg p-4 text-center shadow-md">
+                <div class="text-2xl font-bold text-yellow-600" id="cleaningCount">5</div>
+                <div class="text-sm text-gray-500">Cleaning</div>
             </div>
-            <div class="stat-card">
-                <div class="stat-number blue">100</div>
-                <div class="stat-label">Total Meja</div>
+            <div class="bg-white rounded-lg p-4 text-center shadow-md hidden md:block">
+                <div class="text-2xl font-bold text-blue-600">100</div>
+                <div class="text-sm text-gray-500">Total</div>
             </div>
-        </div>
-
-        <!-- Zone Buttons -->
-        <div class="zones">
-            <button class="zone-btn zone-all" onclick="showZone('all')">Semua Area</button>
-            <button class="zone-btn zone-a" onclick="showZone('A')">Area A - Depan (1-25)</button>
-            <button class="zone-btn zone-b" onclick="showZone('B')">Area B - Tengah (26-55)</button>
-            <button class="zone-btn zone-c" onclick="showZone('C')">Area C - Belakang (56-80)</button>
-            <button class="zone-btn zone-d" onclick="showZone('D')">Area D - Outdoor (81-100)</button>
+            <div class="bg-white rounded-lg p-4 text-center shadow-md hidden md:block">
+                <div class="text-2xl font-bold text-purple-600">20%</div>
+                <div class="text-sm text-gray-500">Okupansi</div>
+            </div>
         </div>
 
         <!-- Tables Grid -->
-        <div class="tables-grid" id="tablesGrid"></div>
+        <div class="table-grid mb-6" id="tablesGrid">
+            <!-- Tables will be generated by JavaScript -->
+        </div>
 
         <!-- Legend -->
-        <div class="legend">
-            <div class="legend-item">
-                <div class="legend-color" style="background: #10b981;"></div>
+        <div class="flex flex-wrap justify-center gap-4 text-sm">
+            <div class="flex items-center gap-2">
+                <div class="w-4 h-4 bg-green-500 rounded"></div>
                 <span>Kosong</span>
             </div>
-            <div class="legend-item">
-                <div class="legend-color" style="background: #ef4444;"></div>
+            <div class="flex items-center gap-2">
+                <div class="w-4 h-4 bg-red-500 rounded"></div>
                 <span>Terisi</span>
             </div>
-            <div class="legend-item">
-                <div class="legend-color" style="background: #f59e0b;"></div>
+            <div class="flex items-center gap-2">
+                <div class="w-4 h-4 bg-yellow-500 rounded"></div>
                 <span>Cleaning</span>
             </div>
         </div>
     </div>
 
     <!-- Modal -->
-    <div id="tableModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal()">&times;</span>
-            <h2 id="modalTitle">Meja 1</h2>
-            <div id="modalBody"></div>
+    <div id="tableModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-lg p-6 w-full max-w-md">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold" id="modalTitle">Meja 1</h2>
+                <button onclick="closeModal()" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+            </div>
+            <div class="space-y-4" id="modalContent">
+                <!-- Modal content will be generated by JavaScript -->
+            </div>
         </div>
     </div>
 
     <script>
-        // Data meja
+        // Initialize tables data
         let tables = [];
         let currentZone = 'all';
 
-        // Inisialisasi meja
+        // Initialize 100 tables
         function initTables() {
             const zones = [
-                { id: 'A', start: 1, end: 25 },
-                { id: 'B', start: 26, end: 55 },
-                { id: 'C', start: 56, end: 80 },
-                { id: 'D', start: 81, end: 100 }
+                { id: 'A', name: 'Area A - Depan', tables: Array.from({length: 25}, (_, i) => i + 1) },
+                { id: 'B', name: 'Area B - Tengah', tables: Array.from({length: 30}, (_, i) => i + 26) },
+                { id: 'C', name: 'Area C - Belakang', tables: Array.from({length: 25}, (_, i) => i + 56) },
+                { id: 'D', name: 'Area D - Outdoor', tables: Array.from({length: 20}, (_, i) => i + 81) }
             ];
 
             zones.forEach(zone => {
-                for (let i = zone.start; i <= zone.end; i++) {
-                    const random = Math.random();
-                    let status = 'available';
-                    if (random > 0.8) status = 'occupied';
-                    else if (random > 0.75) status = 'cleaning';
-
+                zone.tables.forEach(tableNum => {
                     tables.push({
-                        id: i,
-                        number: i,
+                        id: tableNum,
+                        number: tableNum,
                         zone: zone.id,
-                        status: status,
-                        customers: status === 'occupied' ? Math.floor(Math.random() * 4) + 1 : 0,
+                        status: Math.random() > 0.8 ? (Math.random() > 0.7 ? 'occupied' : 'cleaning') : 'available',
+                        customers: 0,
                         customerName: '',
-                        startTime: status === 'occupied' ? new Date() : null
+                        startTime: null
                     });
-                }
+                });
             });
-            renderTables();
         }
 
-        // Render meja
+        // Render tables
         function renderTables() {
             const grid = document.getElementById('tablesGrid');
-            const filtered = currentZone === 'all' ? tables : tables.filter(t => t.zone === currentZone);
+            const filteredTables = currentZone === 'all' ? tables : tables.filter(t => t.zone === currentZone);
 
-            grid.innerHTML = filtered.map(table => `
-                <div class="table ${table.status}" onclick="openModal(${table.id})">
-                    <div class="table-num">${table.number}</div>
-                    <div class="table-zone">${table.zone}</div>
-                    ${table.status === 'occupied' ? `<div class="table-info">${table.customers}👥</div>` : ''}
+            grid.innerHTML = filteredTables.map(table => `
+                <div class="table-item ${table.status}" onclick="openModal(${table.id})">
+                    <div class="font-bold text-lg">${table.number}</div>
+                    <div class="text-xs">${table.zone}</div>
+                    ${table.status === 'occupied' ? `<div class="text-xs">${table.customers || 2} orang</div>` : ''}
                 </div>
             `).join('');
 
             updateStats();
         }
 
-        // Update statistik
+        // Update statistics
         function updateStats() {
-            document.getElementById('availableCount').textContent = tables.filter(t => t.status === 'available').length;
-            document.getElementById('occupiedCount').textContent = tables.filter(t => t.status === 'occupied').length;
-            document.getElementById('cleaningCount').textContent = tables.filter(t => t.status === 'cleaning').length;
+            const available = tables.filter(t => t.status === 'available').length;
+            const occupied = tables.filter(t => t.status === 'occupied').length;
+            const cleaning = tables.filter(t => t.status === 'cleaning').length;
+
+            document.getElementById('availableCount').textContent = available;
+            document.getElementById('occupiedCount').textContent = occupied;
+            document.getElementById('cleaningCount').textContent = cleaning;
         }
 
-        // Tampilkan zone
+        // Show zone
         function showZone(zone) {
             currentZone = zone;
             renderTables();
         }
 
-        // Buka modal
+        // Open modal
         function openModal(tableId) {
             const table = tables.find(t => t.id === tableId);
             document.getElementById('modalTitle').textContent = `Meja ${table.number} - Area ${table.zone}`;
             
-            let body = `<p><strong>Status:</strong> ${table.status}</p>`;
+            let content = `<div class="text-sm text-gray-600 mb-4">Status: <span class="font-medium capitalize">${table.status}</span></div>`;
             
             if (table.status === 'available') {
-                body += `<button class="btn btn-red" onclick="changeStatus(${tableId}, 'occupied')">Isi Meja</button>`;
+                content += `
+                    <button onclick="changeStatus(${tableId}, 'occupied')" class="bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-600 w-full mb-2">
+                        Isi Meja
+                    </button>
+                `;
             } else if (table.status === 'occupied') {
-                body += `
-                    <label>Nama Pelanggan:</label>
-                    <input type="text" class="input" id="customerName" value="${table.customerName}" placeholder="Masukkan nama">
-                    <label>Jumlah Orang:</label>
-                    <input type="number" class="input" id="customerCount" value="${table.customers}" min="1" max="20">
-                    <div>
-                        <button class="btn btn-yellow" onclick="changeStatus(${tableId}, 'cleaning')">Perlu Cleaning</button>
-                        <button class="btn btn-green" onclick="changeStatus(${tableId}, 'available')">Kosongkan Meja</button>
+                content += `
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nama Pelanggan</label>
+                        <input type="text" id="customerName" value="${table.customerName}" class="w-full p-2 border border-gray-300 rounded-md">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Jumlah Pelanggan</label>
+                        <input type="number" id="customerCount" value="${table.customers || 2}" min="1" max="20" class="w-full p-2 border border-gray-300 rounded-md">
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="changeStatus(${tableId}, 'cleaning')" class="bg-yellow-500 text-white py-2 px-4 rounded-md hover:bg-yellow-600 flex-1">
+                            Perlu Cleaning
+                        </button>
+                        <button onclick="changeStatus(${tableId}, 'available')" class="bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600 flex-1">
+                            Kosongkan
+                        </button>
                     </div>
                 `;
             } else if (table.status === 'cleaning') {
-                body += `<button class="btn btn-green" onclick="changeStatus(${tableId}, 'available')">Selesai Cleaning</button>`;
+                content += `
+                    <button onclick="changeStatus(${tableId}, 'available')" class="bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600 w-full mb-2">
+                        Selesai Cleaning
+                    </button>
+                `;
             }
 
-            document.getElementById('modalBody').innerHTML = body;
-            document.getElementById('tableModal').style.display = 'block';
+            document.getElementById('modalContent').innerHTML = content;
+            document.getElementById('tableModal').style.display = 'flex';
         }
 
-        // Tutup modal
+        // Close modal
         function closeModal() {
             document.getElementById('tableModal').style.display = 'none';
         }
 
-        // Ubah status meja
+        // Change table status
         function changeStatus(tableId, newStatus) {
             const table = tables.find(t => t.id === tableId);
-            
-            // Update dari input jika ada
-            const nameInput = document.getElementById('customerName');
-            const countInput = document.getElementById('customerCount');
-            if (nameInput) table.customerName = nameInput.value;
-            if (countInput) table.customers = parseInt(countInput.value) || 0;
-            
             table.status = newStatus;
+            
             if (newStatus === 'occupied') {
+                table.customers = 2;
                 table.startTime = new Date();
-                if (!table.customers) table.customers = 2;
             } else if (newStatus === 'available') {
                 table.customers = 0;
                 table.customerName = '';
                 table.startTime = null;
             }
-
+            
             closeModal();
             renderTables();
         }
 
-        // Inisialisasi saat halaman dimuat
-        window.onload = initTables;
-
-        // Tutup modal jika klik di luar
-        window.onclick = function(event) {
-            const modal = document.getElementById('tableModal');
-            if (event.target == modal) {
-                closeModal();
-            }
-        }
+        // Initialize on load
+        window.onload = function() {
+            initTables();
+            renderTables();
+        };
     </script>
 </body>
 </html>
